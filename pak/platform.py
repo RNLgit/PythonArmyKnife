@@ -4,7 +4,7 @@ This module collects and summarizes info of the operating system script is runni
 import platform
 import sys
 
-OS_TYPE = {'Darwin': 'macOS', 'Windows': 'Windows', 'Linus': 'Linux'}
+OS_TYPE = {'Darwin': 'macOS', 'Windows': 'Windows', 'Linux': 'Linux'}
 
 
 class Platform(object):
