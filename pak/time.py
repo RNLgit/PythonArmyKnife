@@ -30,12 +30,13 @@ def stopwatch(func):
     """
     def inner(*args, **kwargs):
         begin = time.time()
-        func(*args, **kwargs)
+        result = func(*args, **kwargs)
         end = time.time()
         try:
             f_name = func.__name__
         except:
             f_name = ''
         print(f'Lap time of function {f_name}: {end - begin}s')
+        return result
 
     return inner
