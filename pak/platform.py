@@ -2,7 +2,10 @@
 This module collects and summarizes info of the operating system script is running on
 """
 import platform
+import os
 import sys
+import types
+import ctypes
 
 OS_TYPE = {'Darwin': 'macOS', 'Windows': 'Windows', 'Linux': 'Linux'}
 
@@ -136,3 +139,66 @@ class Python(object):
         return self._info['python_revision']
 
 
+class System(object):
+    @property
+    def is_admin(self):
+        """
+        check if current script is running under admin privilege
+
+        .. Note::
+            this is a Windows platform function
+        """
+        if os.name == 'nt':
+            return bool(ctypes.windll.shell32.IsUserAnAdmin())
+        elif os.name == 'posix':
+            return os.getuid() == 0
+        else:
+            raise NotImplementedError(f"Not support {Platform().info['OS']} yet")
+
+    def runAsAdmin(self, cmd_line=None, wait=True):
+        """
+        reference: https://stackoverflow.com/questions/19672352/how-to-run-script-with-elevated-privilege-on-windows
+        """
+        if os.name != 'nt':
+            raise RuntimeError
+
+        import win32api, win32con, win32event, win32process
+        from win32com.shell.shell import ShellExecuteEx
+        from win32com.shell import shellcon
+        python_exe = sys.executable
+        if cmd_line is None:
+            cmd_line = [python_exe] + sys.argv
+        # elif type(cmd_line) not in (types.TupleType, types.ListType):
+        #     raise ValueError
+        print(f'cmd is:{cmd_line}')
+        cmd = cmd_line[0]
+        # XXX TODO: isn't there a function or something we can call to massage command line params?
+        params = " ".join(['"%s"' % (x,) for x in cmd_line[1:]])
+        cmdDir = ''
+        showCmd = win32con.SW_SHOWNORMAL
+        # showCmd = win32con.SW_HIDE
+        lpVerb = 'runas'  # causes UAC elevation prompt.
+
+        # print "Running", cmd, params
+
+        # ShellExecute() doesn't seem to allow us to fetch the PID or handle
+        # of the process, so we can't get anything useful from it. Therefore
+        # the more complex ShellExecuteEx() must be used.
+
+        # procHandle = win32api.ShellExecute(0, lpVerb, cmd, params, cmdDir, showCmd)
+
+        procInfo = ShellExecuteEx(nShow=showCmd,
+                                  fMask=shellcon.SEE_MASK_NOCLOSEPROCESS,
+                                  lpVerb=lpVerb,
+                                  lpFile=cmd,
+                                  lpParameters=params)
+
+        if wait:
+            procHandle = procInfo['hProcess']
+            obj = win32event.WaitForSingleObject(procHandle, win32event.INFINITE)
+            rc = win32process.GetExitCodeProcess(procHandle)
+            # print "Process handle %s returned code %s" % (procHandle, rc)
+        else:
+            rc = None
+
+        return rc
