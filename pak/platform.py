@@ -144,23 +144,21 @@ class System(object):
     def is_admin(self):
         """
         check if current script is running under admin privilege
-
-        .. Note::
-            this is a Windows platform function
         """
-        if os.name == 'nt':
+        if os.name == 'nt':  # windows
             return bool(ctypes.windll.shell32.IsUserAnAdmin())
-        elif os.name == 'posix':
-            return os.getuid() == 0
+        elif os.name == 'posix':  # Unix or Linux
+            return os.getuid() == 0  # root user is 0
         else:
             raise NotImplementedError(f"Not support {Platform().info['OS']} yet")
 
-    def runAsAdmin(self, cmd_line=None, wait=True):
+    def get_admin(self, cmd_line=None, wait=True):
         """
+        Get admin right for current running script
         reference: https://stackoverflow.com/questions/19672352/how-to-run-script-with-elevated-privilege-on-windows
         """
-        if os.name != 'nt':
-            raise RuntimeError
+        if Platform().info['OS'] != 'Windows':
+            raise NotImplementedError('Not support non-Windows platform')
 
         import win32api, win32con, win32event, win32process
         from win32com.shell.shell import ShellExecuteEx
@@ -178,15 +176,12 @@ class System(object):
         showCmd = win32con.SW_SHOWNORMAL
         # showCmd = win32con.SW_HIDE
         lpVerb = 'runas'  # causes UAC elevation prompt.
-
-        # print "Running", cmd, params
-
+        print(f"Running: {cmd}, {params}")
         # ShellExecute() doesn't seem to allow us to fetch the PID or handle
         # of the process, so we can't get anything useful from it. Therefore
         # the more complex ShellExecuteEx() must be used.
 
         # procHandle = win32api.ShellExecute(0, lpVerb, cmd, params, cmdDir, showCmd)
-
         procInfo = ShellExecuteEx(nShow=showCmd,
                                   fMask=shellcon.SEE_MASK_NOCLOSEPROCESS,
                                   lpVerb=lpVerb,
@@ -197,8 +192,7 @@ class System(object):
             procHandle = procInfo['hProcess']
             obj = win32event.WaitForSingleObject(procHandle, win32event.INFINITE)
             rc = win32process.GetExitCodeProcess(procHandle)
-            # print "Process handle %s returned code %s" % (procHandle, rc)
+            print(f'Process handle {procHandle} returned code {rc}')
         else:
             rc = None
-
         return rc
