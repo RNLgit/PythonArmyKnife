@@ -6,7 +6,7 @@ setup(
     description='A light weight Python utility tool work like an army knife',
     long_description=open('README.md').read(),
     classifiers=[],
-    install_requires=['numpy', 'matplotlib', 'pandas', 'opencv-python'],
+    install_requires=['numpy', 'matplotlib', 'pandas', 'opencv-python', 'pillow'],
     setup_requires=[],
     scripts=[],
     python_requires='>=3.6',

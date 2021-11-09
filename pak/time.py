@@ -36,7 +36,7 @@ def stopwatch(func):
             f_name = func.__name__
         except:
             f_name = ''
-        print(f'Lap time of function {f_name}: {end - begin}s')
+        print(f"Lap time of function '{f_name}': {end - begin}s")
         return result
 
     return inner
