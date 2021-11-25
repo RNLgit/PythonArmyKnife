@@ -1,2 +1,2 @@
 # PythonArmyKnife
-light weight python tool pack like a Swiss Army Knife
+light weight python tool pack work like a Swiss Army Knife -- can't do sophisticated job but meets most of your basic needs
