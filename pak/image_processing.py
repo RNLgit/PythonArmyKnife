@@ -4,9 +4,14 @@ import pytesseract
 from pak.time import stopwatch
 import numpy as np
 from cv2 import COLOR_BGR2GRAY
+from PIL import Image
 
 
 class ImageProcessing(object):
+    @staticmethod
+    def open_image2np(file_dir: str):
+        return np.array(Image.open(file_dir))
+
     def grayscale_image(self, data_array):
         return cv2.cvtColor(data_array, cv2.COLOR_BGR2GRAY)
 
@@ -76,14 +81,3 @@ class VideoProcessing(ImageProcessing):
         if index > self.frames_total:
             raise IndexError('index shall be less than total frame count')
         return self.frames[index]
-
-
-@stopwatch
-def test_ocr():
-    a = VideoProcessing('/Users/runnanl/PycharmProjects/PythonMuddyWater/opencv_sandbox/prompter_eg1.mkv')
-    for i in a.frames:
-        st = time.time()
-        g = a.grayscale_image(i[1000:None, None:None])
-        txt = a.get_image_text(g)
-        ed = time.time()
-        print(f'time cost: {ed-st}, cap fps={1/(ed-st)}, txt:{txt}')
