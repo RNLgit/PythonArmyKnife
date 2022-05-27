@@ -9,6 +9,15 @@ from PIL import Image
 
 class ImageProcessing(object):
     @staticmethod
+    def img_class(image_data) -> str:
+        if type(image_data) == Image.Image:
+            return 'PIL'
+        elif type(image_data) == np.ndarray:
+            return 'numpy'
+        else:
+            raise NotImplementedError(f'not supported image class {type(self.im)}')
+
+    @staticmethod
     def open_image2np(file_dir: str):
         return np.array(Image.open(file_dir))
 
@@ -40,6 +49,8 @@ class ImageProcessing(object):
     @staticmethod
     def show_image(image_data):
         import matplotlib.pyplot as plt
+        if ImageProcessing.img_class(image_data) != 'numpy':
+            image_data = np.array(image_data)
         if image_data.ndim == 2:  # grayscale image
             plt.imshow(image_data, cmap='gray', vmin=0, vmax=255)
         elif image_data.ndim == 3:  # colour image
